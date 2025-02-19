@@ -8,7 +8,7 @@ class FlashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplash(
-      type: Transition.rightToLeftWithFade,
+      type: Transition.fade,
       navigator: HomeScreen(),
       curve: Curves.easeInOut,
       durationInSeconds: 2,
