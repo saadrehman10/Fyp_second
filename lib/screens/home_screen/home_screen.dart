@@ -10,27 +10,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Controller to capture user input for the device address.
+  final TextEditingController _deviceAddressController =
+      TextEditingController();
+
   BluetoothConnection? connection;
   bool isConnected = false;
   String incomingData = "No data received yet.";
   String dataType = "Unknown";
 
-  // Replace with your Bluetooth device's address
-  final String deviceAddress = "00:00:00:00:00:00";
-
+  // Removed the auto connection from initState.
   @override
   void initState() {
     super.initState();
-    _connectToBluetooth();
   }
 
   @override
   void dispose() {
+    _deviceAddressController.dispose();
     connection?.dispose();
     super.dispose();
   }
 
   void _connectToBluetooth() async {
+    final String deviceAddress = _deviceAddressController.text.trim();
+    if (deviceAddress.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a device address.')),
+      );
+      return;
+    }
+
     try {
       BluetoothConnection newConnection = await BluetoothConnection.toAddress(
         deviceAddress,
@@ -52,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         isConnected = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error connecting to device.')),
+      );
     }
   }
 
@@ -60,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String dataString = String.fromCharCodes(data).trim();
     print("Data incoming: $dataString");
 
-    // Parse the data type based on the content
+    // Parse the data type based on the content.
     String type = _parseDataType(dataString);
 
     setState(() {
@@ -70,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _parseDataType(String data) {
-    // Assuming the data is sent with a prefix indicating its type.
     // Modify these conditions to match your data format.
     if (data.startsWith("TEMP:")) {
       return "Temperature";
@@ -85,30 +97,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Bluetooth Data Receiver')),
+      appBar: AppBar(title: const Text('Bluetooth Data Receiver')),
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Bluetooth Connection Status:',
-                style: TextStyle(fontSize: 20),
-              ),
-              Text(
-                isConnected ? 'Connected' : 'Disconnected',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: isConnected ? Colors.green : Colors.red,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Bluetooth Connection Status:',
+                  style: TextStyle(fontSize: 20),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text('Data Type:', style: TextStyle(fontSize: 20)),
-              Text(dataType, style: TextStyle(fontSize: 20)),
-              SizedBox(height: 20),
-              Text('Data Received:', style: TextStyle(fontSize: 20)),
-              Text(incomingData, style: TextStyle(fontSize: 20)),
-            ],
+                Text(
+                  isConnected ? 'Connected' : 'Disconnected',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: isConnected ? Colors.green : Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Input field for the Bluetooth device address.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: TextField(
+                    controller: _deviceAddressController,
+                    decoration: const InputDecoration(
+                      labelText: 'Device Address',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _connectToBluetooth,
+                  child: const Text('Connect'),
+                ),
+                const SizedBox(height: 20),
+                Text('Data Type:', style: TextStyle(fontSize: 20)),
+                Text(dataType, style: TextStyle(fontSize: 20)),
+                const SizedBox(height: 20),
+                Text('Data Received:', style: TextStyle(fontSize: 20)),
+                Text(incomingData, style: TextStyle(fontSize: 20)),
+              ],
+            ),
           ),
         ),
       ),
