@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,13 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isConnected = false;
   String incomingData = "No data received yet.";
   String dataType = "Unknown";
-  List<String> dataList = []; // List to store incoming data every second
-
-  @override
-  void initState() {
-    super.initState();
-    _requestBluetoothPermissions(); // Request permissions at startup
-  }
+  List<String> dataList = []; // List to store incoming data history.
 
   @override
   void dispose() {
@@ -32,36 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  // Request Bluetooth permissions using permission_handler
-  Future<void> _requestBluetoothPermissions() async {
-    await Permission.bluetoothScan.request();
-    await Permission.bluetoothConnect.request();
-    await Permission.locationWhenInUse.request();
-
-    if (await Permission.bluetoothScan.isGranted &&
-        await Permission.bluetoothConnect.isGranted &&
-        await Permission.locationWhenInUse.isGranted) {
-      print("Bluetooth permissions granted.");
-      _checkBluetoothEnabled(); // Ensure Bluetooth is enabled if permissions are granted
-    } else {
-      print("Bluetooth permissions not granted.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please grant Bluetooth permissions.")),
-      );
-    }
-  }
-
-  // Check if Bluetooth is enabled
-  Future<void> _checkBluetoothEnabled() async {
-    BluetoothState bluetoothState = await FlutterBluetoothSerial.instance.state;
-    if (bluetoothState == BluetoothState.STATE_OFF) {
-      await FlutterBluetoothSerial.instance.requestEnable();
-    } else {
-      print("Bluetooth is already enabled.");
-    }
-  }
-
-  // Connect to Bluetooth device
+  // Connect to a Bluetooth device.
   void _connectToBluetooth() async {
     final String deviceAddress = _deviceAddressController.text.trim();
     if (deviceAddress.isEmpty) {
@@ -93,14 +57,12 @@ class _HomeScreenState extends State<HomeScreen> {
         isConnected = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error connecting to device. ${error.toString()}'),
-        ),
+        SnackBar(content: Text('Error connecting to device: $error')),
       );
     }
   }
 
-  // Handle incoming data from the Bluetooth device
+  // Handle incoming data from the Bluetooth device.
   void _onDataReceived(Uint8List data) {
     String dataString = String.fromCharCodes(data).trim();
     print("Data incoming: $dataString");
@@ -110,26 +72,23 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       incomingData = dataString;
       dataType = type;
-
-      // Add the incoming data to the list
       dataList.add(dataString);
 
-      // Limit the data list to show only the last 10 items
+      // Keep only the last 10 items.
       if (dataList.length > 10) {
-        dataList.removeAt(0); // Remove the first item if there are more than 10
+        dataList.removeAt(0);
       }
     });
 
-    // Delay the next data display by 1 second
-    Future.delayed(Duration(seconds: 1), () {
+    // Optionally, update the displayed data list every second.
+    Future.delayed(const Duration(seconds: 1), () {
       setState(() {
-        // Display the updated list every second
         incomingData = dataList.join('\n');
       });
     });
   }
 
-  // Parse the data type (e.g., TEMP, HUM, PRES) from the received data
+  // Parse the data type from the received string.
   String _parseDataType(String data) {
     if (data.startsWith("TEMP:")) {
       return "Temperature";
@@ -148,21 +107,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              child: Text('Bluetooth Data Receiver'),
+            const DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Bluetooth Data Receiver',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             ListTile(
               title: const Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
               title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              onTap: () => Navigator.pop(context),
             ),
           ],
         ),
@@ -174,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
+                const Text(
                   'Bluetooth Connection Status:',
                   style: TextStyle(fontSize: 20),
                 ),
@@ -186,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Input field for the Bluetooth device address.
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: TextField(
@@ -203,13 +160,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Text('Connect'),
                 ),
                 const SizedBox(height: 20),
-                Text('Data Type:', style: TextStyle(fontSize: 20)),
-                Text(dataType, style: TextStyle(fontSize: 20)),
+                const Text('Data Type:', style: TextStyle(fontSize: 20)),
+                Text(dataType, style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 20),
-                Text('Data Received:', style: TextStyle(fontSize: 20)),
-                Text(incomingData, style: TextStyle(fontSize: 20)),
+                const Text('Data Received:', style: TextStyle(fontSize: 20)),
+                Text(incomingData, style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 20),
-                Text('Data History (Last 10):', style: TextStyle(fontSize: 20)),
+                const Text(
+                  'Data History (Last 10):',
+                  style: TextStyle(fontSize: 20),
+                ),
                 Column(children: dataList.map((data) => Text(data)).toList()),
               ],
             ),
