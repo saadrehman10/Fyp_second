@@ -1,3 +1,4 @@
+import 'package:bio_signal/models/bluetooth_permission.dart';
 import 'package:bio_signal/models/shared_prefrenced.dart';
 import 'package:bio_signal/screens/flash_screen/flash_screen.dart';
 import 'package:bio_signal/screens/home_screen/home_screen.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorage.initialize();
+  await BluetoothPermission.requestPermissions();
   runApp(const MyApp());
 }
 
