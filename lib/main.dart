@@ -1,9 +1,18 @@
+import 'package:bio_signal/models/shared_prefrenced.dart';
 import 'package:bio_signal/screens/flash_screen/flash_screen.dart';
 import 'package:bio_signal/screens/home_screen/home_screen.dart';
 import 'package:bio_signal/screens/settings_screen/settings_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   LocalStorage.initialize();
+//   runApp(const MyApp());
+// }
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorage.initialize();
   runApp(const MyApp());
 }
 
