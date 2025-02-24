@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       home: FlashScreen(),
       routes: {
         '/HomeScreen': (context) => const HomeScreen(),
-        '/SettingsScreen': (context) => const SettingsScreen(),
+        '/SettingsScreen': (context) => SettingsScreen(),
       },
     );
   }
