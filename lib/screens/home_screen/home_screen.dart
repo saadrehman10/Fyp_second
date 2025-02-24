@@ -120,7 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               title: const Text('Settings'),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pushNamed(context, '/SettingsScreen');
+              },
             ),
           ],
         ),

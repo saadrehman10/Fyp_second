@@ -10,7 +10,7 @@
 
 
     <application
-        android:label="bio_signal"
+        android:label="Bio Signal"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
